@@ -1,0 +1,512 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Todo</title>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    
+    <script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script>
+        $(document).bind('mobileinit',function(){
+            $.mobile.changePage.defaults.changeHash = false;
+            $.mobile.hashListeningEnabled = false;
+            $.mobile.pushStateEnabled = false;
+        });
+        
+        $(document).ready(function(){
+            
+                var counter=1;
+                var listCreated = false;
+                 var activelistCreated = false;
+                $('#txttask').prop('disabled', false);        
+                $("#txttask").hide();
+                 $("#code").hide();                            
+                $('#txttask').on('keypress', function (event) {
+                 if(event.which === 13){
+                    $('#txttask').prop('disabled', false);
+                    $("#list").listview().remove();
+                    $("#activelist").listview().remove();
+                     $("#completedlist").listview().remove();
+                     $("#alllist").listview().remove();
+                     $("#items").append("<ul id='list' data-role='listview' data-inset='true' style='background-color:#333538;'></ul>");
+                     listCreated = true;
+                     $("#items").trigger("create");              
+                     var value=$("#txttask").val();
+                      
+                             
+                     for(var key=1;key<counter;++key)
+                        {
+                            var retrievedObject = localStorage.getItem(key);
+                            if(retrievedObject!==null)
+                            {
+                            var Object=JSON.parse(retrievedObject);
+                            var item_no=Object['item_no'];
+                            var task=Object['task'];
+                            var active=Object['active'];
+                             var listItem;
+                            if(active===true)
+                            {
+                                listItem = "<li id='"+item_no+"' ondblclick='dbl()' class='hi'><input type='checkbox' class='custom'  name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                     
+                     "<a id='delButton"+key+"' href='' class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-right ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                            }
+                            else{
+                                listItem = "<li id='"+item_no+"' ondblclick='dbl()'  class='hi'><input type='checkbox' checked = true class='custom'   name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                     
+                     "<a id='delButton"+key+"' href=''  class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-right ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                       
+                            }
+                             $("#list").append(listItem);
+
+                               $("#list").listview("refresh");
+                                
+                            } 
+                        }
+                        if(($("#txttask").val()===" ")||($("#txttask").val()===null))
+                     {   
+                          alert("enter valid data");
+                     }
+                     else
+                     {     
+                        var listItem = "<li id='"+counter+"' ondblclick='dbl()'  class='hi'><input type='checkbox' class='custom' onchange='chkboxchange()' name='"+counter+"' id='checkbox"+counter+"'>"+value+
+                     
+                             "<a id='delButton"+counter+"' href=''   class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-right ui-btn-icon-notext' style='float: right;position: absolute;left:80%;'></a></li>";
+                    
+                     if (typeof(Storage) !== "undefined")
+                     {
+                        
+                        var active=true;
+                        
+                        var testObject = { 'item_no': counter, 'task': value, 'active': true };
+                        localStorage.setItem(counter, JSON.stringify(testObject));
+                        var retrievedObject = localStorage.getItem(counter);
+                     } 
+                            counter=counter+1;
+                          $("#list").append(listItem);
+                            $("#list").listview("refresh");
+                            $('#txttask').val(' ');
+                      }
+                 }
+                   });
+                            var oriVal,newval;
+                            var liid;
+                            $('#items').on('dblclick','.hi',function(){
+                                oriVal = $(this).text();
+                                liid=$(this).attr('id');
+                                
+                                console.log("text:"+oriVal);
+                                console.log("id:"+liid);
+                                $(this).text("");
+                                $("<input type='text' id='edit'>").appendTo(this).focus();
+                                
+                            });
+                            $('#items').on('keypress','li > input[id="edit"]', function (event) {
+                                console.log(1);
+                                if(event.which === 13){
+                                    console.log("pp:"+$(this).parent().parent().attr('id'));
+                                    var ppid=$(this).parent().parent().attr('id');
+                                    newval=$(this).val();
+                                    $('#edit').remove();
+                                    if(newval===null)
+                                    {
+                                        newval=oriVal;
+                                    }
+                                    var retrievedObject = localStorage.getItem(liid);
+                                     var Object=JSON.parse(retrievedObject);
+                                     var item_no=Object['item_no'];
+                                     var task=Object['task'];
+                                     var active=Object['active'];
+                                     console.log(item_no+","+task+","+active);
+                                var testObject = { 'item_no': item_no, 'task': newval, 'active': active };
+                                localStorage.setItem(liid, JSON.stringify(testObject));                         
+                                $("#list").listview().remove();
+                                 $("#activelist").listview().remove();
+                                $("#completedlist").listview().remove();
+                                $("#alllist").listview().remove();            
+                                if(ppid==="list")
+                                {
+                                 $("#items").append("<ul id='list' data-role='listview' data-inset='true' style='background-color:#333538;'></ul>");
+                                listCreated = true;
+                                $("#items").trigger("create");
+                     
+                                for(var key=1;key<counter;++key)
+                                    {
+                                        var retrievedObject = localStorage.getItem(key);
+                                        if(retrievedObject!==null)
+                                        {
+                                        var Object=JSON.parse(retrievedObject);
+                                        var item_no=Object['item_no'];
+                                        var task=Object['task'];
+                                        var active=Object['active'];
+                                        var listItem;
+                                        if(active===true)
+                                        {
+                                            listItem = "<li id='"+item_no+"' ondblclick='dbl()' class='hi'><input type='checkbox' class='custom'  name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                                
+                                "<a id='delButton"+key+"' href='' class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete  ui-btn-icon-notext' style='float: right;position: absolute;left:80%;'></a></li>";
+                                        }
+                                        else{
+                                            listItem = "<li id='"+item_no+"' ondblclick='dbl()'  class='hi'><input type='checkbox' checked = true class='custom'   name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                                
+                                "<a id='delButton"+key+"' href=''  class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete  ui-btn-icon-notext' style='float: right;position: absolute;left:80%;'></a></li>";
+                                
+                                        }
+                                        $("#list").append(listItem);
+
+                                        $("#list").listview("refresh");
+                                
+                               
+                                        
+                                    } 
+                                }
+                                
+                                
+                               }
+                               else if(ppid==="activelist"){
+                                   $("#items").append("<ul id='activelist' data-role='listview' data-inset='true' style='background-color:#333538;'></ul>");
+                                    
+                                        $("#items").trigger("create");
+                                    
+                                        for(var key=1;key<counter;++key)
+                                        {
+                                            var retrievedObject = localStorage.getItem(key);
+                                        if(retrievedObject!==null)
+                                        { 
+                                            var Object=JSON.parse(retrievedObject);
+                                            var item_no=Object['item_no'];
+                                            var task=Object['task'];
+                                            var active=Object['active'];
+                                            if(active===true)
+                                            {
+                                                var listItem = "<li id='"+item_no+"'  ondblclick='dbl()' class='hi'><input type='checkbox' class='custom' onchange='chkboxchange()' name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                                    
+                                    "<a id='delButton"+key+"' href=''  OnClick = 'del()' class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                                    $("#activelist").append(listItem);
+
+                                            $("#activelist").listview("refresh");
+                                                
+                                                
+                                
+                            }
+                           }
+                        }
+                        
+                               }
+                               else if(ppid==="completedlist"){
+                                    $("#items").append("<ul id='completedlist' data-role='listview' data-inset='true' style='background-color:#7B8087;'></ul>");
+                       
+                        $("#items").trigger("create");
+                     
+                        for(var key=1;key<counter;++key)
+                        {
+                            var retrievedObject = localStorage.getItem(key);
+                            if(retrievedObject!==null)
+                            {
+                            var Object=JSON.parse(retrievedObject);
+                            var item_no=Object['item_no'];
+                            var task=Object['task'];
+                            var active=Object['active'];
+                            if(active===false)
+                            {
+                                var listItem = "<li id='"+item_no+"' class='hi'><input type='checkbox' checked = true class='custom' onchange='chkboxchange()' name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                     
+                     "<a id='delButton"+key+"' href='' OnClick = 'del()' class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                      $("#completedlist").append(listItem);
+
+                               $("#completedlist").listview("refresh");
+                                
+                               
+                                
+                            }
+                        }
+                        }
+                               }
+                               else if(ppid==="alllist"){
+                                   $("#items").append("<ul id='alllist' data-role='listview' data-inset='true' style='background-color:#333538;'></ul>");
+                       
+                        $("#items").trigger("create");
+                     
+                        for(var key=1;key<counter;++key)
+                        {
+                            var retrievedObject = localStorage.getItem(key);
+                            if(retrievedObject!==null)
+                            {
+                            var Object=JSON.parse(retrievedObject);
+                            var item_no=Object['item_no'];
+                            var task=Object['task'];
+                            var active=Object['active'];
+                            var listItem;
+                            if(active===true)
+                            {
+                                listItem = "<li id='"+item_no+"' class='hi'><input type='checkbox' class='custom' onchange='chkboxchange()' name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                     
+                     "<a id='delButton"+key+"' href=''  OnClick = 'del()' class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete  ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                            }
+                            else{
+                                listItem = "<li id='"+item_no+"' class='hi'><input type='checkbox' checked = true class='custom' onchange='chkboxchange()' name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                     
+                     "<a id='delButton"+key+"' href='' OnClick = 'del()'  class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete  ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                       
+                            }
+                      
+                      $("#alllist").append(listItem);
+
+                               $("#alllist").listview("refresh");
+                                
+                                
+                                
+                            
+                        }
+                        }
+                               }
+                     
+                  
+                                }
+                            });     
+                    
+                                            
+                            
+                             $('#items').on('click', '.hi' ,function(){
+                                 console.log($(this).find( "input[type=checkbox]" ).is(':checked'));
+                            if($(this).find( "input[type=checkbox]" ).is(':checked')){
+                               
+                                console.log("entered if");
+                                 var key = $(this).attr('id'); 
+                                 
+                                  if (typeof(Storage) !== "undefined")
+                                {
+                                    
+                                     var retrievedObject = localStorage.getItem(key);
+                                     var Object=JSON.parse(retrievedObject);
+                                     var item_no=Object['item_no'];
+                                     var task=Object['task'];
+                                     var active=Object['active'];
+                                    
+                                var testObject = { 'item_no': item_no, 'task': task, 'active': false };
+                                localStorage.setItem(key, JSON.stringify(testObject));
+                                 var retrievedObject = localStorage.getItem(key);
+                                
+                                var Object=JSON.parse(retrievedObject);
+                        
+
+                                }
+                            }
+                            else{
+                              
+                                console.log("entered else");
+                                var key = $(this).attr('id'); 
+                                 
+                                  if (typeof(Storage) !== "undefined")
+                                {
+                                    
+                                     var retrievedObject = localStorage.getItem(key);
+                                     var Object=JSON.parse(retrievedObject);
+                                     var item_no=Object['item_no'];
+                                     var task=Object['task'];
+                                     var active=Object['active'];
+                                   
+                                var testObject = { 'item_no': item_no, 'task': task, 'active': true };
+                                localStorage.setItem(key, JSON.stringify(testObject));
+                                 var retrievedObject = localStorage.getItem(key);
+                             
+                                var Object=JSON.parse(retrievedObject);
+                       
+
+                                }
+                            }
+                            
+            });
+                    
+                            
+                            var li = '';
+                            $('#items').on('click', 'a' ,function(){
+                                    li= $(this).parent();
+                                    var par=$(this).parent().attr('id');
+                                        li.remove();
+                                    localStorage.removeItem(par);
+                                    console.log(par);
+                                });
+
+                                chkid='checkbox1';
+                                
+                                    if(chkid.checked) 
+                                    {
+                                    
+                                        var par= $(chkid).parent();
+                                        
+                                        $("#li1").wrap("<strike>");
+                                    
+                                    }
+                                
+                                    $("#add").click(function(){
+                                            
+                                            $("#txttask").slideToggle("slow").focus();
+                                            $('#txttask').prop('disabled', false);
+                                            $("#activelist").listview().remove();
+                                        $("#completedlist").listview().remove();
+                                        $("#alllist").listview().remove();
+
+                                    });
+                                    $("#butn").click(function(){
+                                    $("#action").listview().show();
+                                    });
+                                    $("#active").click(function(){
+                                        $("#list").listview().hide();
+                                        $("#txttask").hide();
+                                        $("#activelist").listview().remove();
+                                        $("#alllist").listview().remove();
+                                        $("#completedlist").listview().remove();
+                                        $("#action").listview().hide();
+                                    $("#items").append("<ul id='activelist' data-role='listview' data-inset='true' style='background-color:#333538;'></ul>");
+                                
+                                    $("#items").trigger("create");
+                                
+                                    for(var key=1;key<counter;++key)
+                                    {
+                                        var retrievedObject = localStorage.getItem(key);
+                                    if(retrievedObject!==null)
+                                    { 
+                                        var Object=JSON.parse(retrievedObject);
+                                        var item_no=Object['item_no'];
+                                        var task=Object['task'];
+                                        var active=Object['active'];
+                                        if(active===true)
+                                                    {
+                                            var listItem = "<li id='"+item_no+"'  ondblclick='dbl()' class='hi'><input type='checkbox' class='custom' onchange='chkboxchange()' name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                                
+                                "<a id='delButton"+key+"' href=''  OnClick = 'del()' class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                                $("#activelist").append(listItem);
+
+                                        $("#activelist").listview("refresh");
+                                        
+                                        }
+                                    }
+                                    }
+                                    
+
+                            });
+                            
+                                $("#completed").click(function(){
+                                $("#list").listview().hide();
+                                $("#txttask").hide();
+                                $("#activelist").listview().remove();
+                                $("#completedlist").listview().remove();
+                                $("#alllist").listview().remove();
+                                $("#action").listview().hide();
+                                    $("#items").append("<ul id='completedlist' data-role='listview' data-inset='true' style='background-color:#333538;'></ul>");
+                                
+                                    $("#items").trigger("create");
+                     
+                                for(var key=1;key<counter;++key)
+                                {
+                                    var retrievedObject = localStorage.getItem(key);
+                                    if(retrievedObject!==null)
+                                    {
+                                    var Object=JSON.parse(retrievedObject);
+                                    var item_no=Object['item_no'];
+                                    var task=Object['task'];
+                                    var active=Object['active'];
+                                    if(active===false)
+                                    {
+                                        var listItem = "<li id='"+item_no+"' class='hi'><input type='checkbox' checked = true class='custom' onchange='chkboxchange()' name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                            
+                            "<a id='delButton"+key+"' href='' OnClick = 'del()' class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                            $("#completedlist").append(listItem);
+
+                                    $("#completedlist").listview("refresh");
+                                        
+                                    }
+                                }
+                                }
+
+                        });
+                   
+                            $("#all").click(function(){
+                            $("#list").listview().hide();
+                            $("#txttask").hide();
+                            $("#activelist").listview().remove();
+                            $("#completedlist").listview().remove();
+                            $("#alllist").listview().remove();
+                            $("#action").listview().hide();
+                                $("#items").append("<ul id='alllist' data-role='listview' data-inset='true' style='background-color:#333538;'></ul>");
+                            
+                                $("#items").trigger("create");
+                            
+                                for(var key=1;key<counter;++key)
+                                {
+                                    var retrievedObject = localStorage.getItem(key);
+                                    if(retrievedObject!==null)
+                                    {
+                                    var Object=JSON.parse(retrievedObject);
+                                    var item_no=Object['item_no'];
+                                    var task=Object['task'];
+                                    var active=Object['active'];
+                                    var listItem;
+                                    if(active===true)
+                                   {
+                                    listItem = "<li id='"+item_no+"' class='hi'><input type='checkbox' class='custom' onchange='chkboxchange()' name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                                
+                                  "<a id='delButton"+key+"' href=''  OnClick = 'del()' class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete  ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                                        }
+                                   else{
+                                    listItem = "<li id='"+item_no+"' class='hi'><input type='checkbox' checked = true class='custom' onchange='chkboxchange()' name='"+item_no+"' id='checkbox"+key+"'>"+ task+
+                                  
+                                   "<a id='delButton"+key+"' href='' OnClick = 'del()'  class='deletestore ui-nodisc-icon ui-shadow ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-notext' style='float: right;position: absolute;left:90%;'></a></li>";
+                                
+                                        }
+                                
+                                $("#alllist").append(listItem);
+
+                                        $("#alllist").listview("refresh");
+                                            
+                                        
+                            
+                        }
+                        }
+
+                   });
+               
+        });
+    </script>
+
+</head>
+
+<body>
+    <div data-role="page" id="pageone" data-theme="b">
+       
+        <div data-role="header" data-fullscreen="true">
+            <div class="ui-grid-b center">
+                <div class="ui-block-a"><a id="butn" href="#popupMenu" data-rel="popup" data-transition="slideup" class="ui-shadow ui-btn ui-corner-all ui-btn-icon-right ui-icon-carat-d ui-btn-icon-notext ui-btn-inline ui-nodisc-icon ">Button</a>
+                    <div data-role="popup" id="popupMenu" data-theme="b">
+                        <ul id="action" data-role="listview" data-inset="true" style="min-width:210px;">
+                            <li data-role="list-divider">Choose an action</li>
+                            <li><a id="active" href="#">Active</a></li>
+                            <li><a id="completed" href="#">Completed</a></li>
+                            <li><a id="all" href="#">All</a></li>
+
+                        </ul>
+                    </div>
+                </div>
+                <div class="ui-block-b ui-mini">
+                    <h1>todos</h1></div>
+                <div class="ui-block-c" style="float: right;position: absolute;left: 85%;">
+                    <a id="add" href="" class="ui-shadow ui-btn ui-corner-all ui-btn-icon-right ui-icon-plus ui-btn-icon-notext ui-btn-inline ui-nodisc-icon "></a>
+                </div>
+            </div>
+
+        </div>
+        
+        <div id="items" class="container">
+           
+            <input id="txttask" type="text" placeholder="What needs to be done?" style="background-color:#3C3F42;">
+            
+        </div>
+
+
+
+    </div>
+
+</body>
+
+</html>
